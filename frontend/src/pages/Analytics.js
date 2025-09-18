@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   TrendingUp, 
@@ -6,12 +6,11 @@ import {
   Minus,
   AlertTriangle,
   BarChart3,
-  Calendar,
   Filter
 } from 'lucide-react';
 import { analyticsAPI } from '../services/api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
 const Analytics = () => {
@@ -31,17 +30,8 @@ const Analytics = () => {
     { key: 'stress_level', label: 'Stress Level', color: '#f97316', unit: '/10' }
   ];
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [timeRange]);
-
-  useEffect(() => {
-    if (selectedMetric) {
-      loadChartData(selectedMetric);
-    }
-  }, [selectedMetric, timeRange]);
-
-  const loadAnalyticsData = async () => {
+  // ✅ useCallback ensures function references are stable
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await analyticsAPI.getAnalytics(timeRange);
@@ -61,9 +51,9 @@ const Analytics = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
 
-  const loadChartData = async (metric) => {
+  const loadChartData = useCallback(async (metric) => {
     try {
       const data = await analyticsAPI.getChartData(metric, timeRange);
       if (data.message) {
@@ -81,7 +71,17 @@ const Analytics = () => {
         [metric]: { dates: [], values: [] }
       }));
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [loadAnalyticsData]);
+
+  useEffect(() => {
+    if (selectedMetric) {
+      loadChartData(selectedMetric);
+    }
+  }, [selectedMetric, timeRange, loadChartData]);
 
   const getTrendIcon = (trend) => {
     switch (trend) {
