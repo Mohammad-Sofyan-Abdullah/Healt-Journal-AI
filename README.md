@@ -72,5 +72,6 @@ An AI-powered personal health tracking and analytics platform that helps users m
 - API documentation is available at `http://localhost:8000/docs` when the backend server is running
 
 ## License
-MIT License
+Mohammad Sofyan Abdullah 
+mohammadsofyanabdullah@gmail.com
 
